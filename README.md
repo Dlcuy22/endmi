@@ -3,13 +3,10 @@
 
 ENDMI is a lightweight project management tool designed to streamline Golang project creation, experimentation, and extension. It focuses on speed, structure, and safety, especially when testing temporary code or prototypes.
 
----
-
 ## Overview
 
 Managing Golang projects often involves repetitive setup, manual folder creation, and cleanup after experiments. ENDMI removes that friction by providing templated project generation and a built-in temporary workspace concept, allowing developers to focus on writing code instead of managing files.
 
----
 
 ## Key Features
 
@@ -33,16 +30,12 @@ Managing Golang projects often involves repetitive setup, manual folder creation
 
 This prevents unused test folders from polluting your workspace while encouraging experimentation.
 
----
-
 ## Use Cases
 
 - Bootstrapping new Golang projects
 - Rapid prototyping and proof-of-concept development
 - Testing ideas without committing to project structure
 - Maintaining clean repositories and local environments
-
----
 
 ## Philosophy
 
@@ -52,18 +45,14 @@ ENDMI follows three core principles:
 - **Safety**: Temporary code should stay temporary unless promoted
 - **Productivity**: Less project management, more development
 
----
-
 ## Status
 
 This project is under active development. Features and APIs may evolve as the tool matures.
 
----
 
 ## License
 
 MIT
-
 ---
 
 ## Contributing
