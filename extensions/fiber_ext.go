@@ -10,7 +10,7 @@ func (fiberTemplate) Name() string        { return "fiber" }
 func (fiberTemplate) Description() string { return "fiber template" }
 func (fiberTemplate) RootDir() string     { return "" }
 func (fiberTemplate) Dependencies() []string {
-	return []string{"github.com/gofiber/fiber/v2", "github.com/g	ofiber/template/html/v2"}
+	return []string{"github.com/gofiber/fiber/v2", "github.com/gofiber/template/html/v2"}
 }
 func (fiberTemplate) Files(projectName string) map[string]string {
 	return map[string]string{

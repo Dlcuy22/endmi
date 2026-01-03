@@ -8,6 +8,7 @@ import (
 
 	"github.com/dlcuy22/endmi/core"
 	"github.com/dlcuy22/endmi/extensions"
+	"github.com/dlcuy22/endmi/utils"
 )
 
 type step int
@@ -16,6 +17,7 @@ const (
 	stepProjectName step = iota
 	stepTemplate
 	stepCreating
+	stepChoice
 	stepDone
 )
 
@@ -93,15 +95,31 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case stepTemplate:
 				m.step = stepCreating
 				return m, m.createProject()
+			case stepChoice:
+				if m.cursor == 0 {
+					// Open terminal in project folder
+					return m, m.openTerminal()
+				} else {
+					// Exit
+					return m, tea.Quit
+				}
+			case stepDone:
+				return m, tea.Quit
 			}
 
 		case "up":
 			if m.step == stepTemplate && m.cursor > 0 {
 				m.cursor--
 			}
+			if m.step == stepChoice && m.cursor > 0 {
+				m.cursor--
+			}
 
 		case "down":
 			if m.step == stepTemplate && m.cursor < len(m.templates)-1 {
+				m.cursor++
+			}
+			if m.step == stepChoice && m.cursor < 1 {
 				m.cursor++
 			}
 
@@ -122,8 +140,16 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case doneMsg:
 		m.err = msg.err
-		m.step = stepDone
-		return m, tea.Quit
+		if msg.err == nil {
+			// Success - show choice
+			m.step = stepChoice
+			m.cursor = 0 // Reset cursor for choice menu
+		} else {
+			// Error - go to done
+			m.step = stepDone
+			return m, tea.Quit
+		}
+		return m, nil
 	}
 
 	return m, nil
@@ -143,35 +169,28 @@ func (m *model) View() string {
 	case stepTemplate:
 		b.WriteString(fmt.Sprintf("Project: %s\n\n", m.projectName))
 		b.WriteString("Select template:\n\n")
-		for i, t := range m.templates {
-			line := fmt.Sprintf("%s — %s", t.Name(), t.Description())
-			if m.cursor == i {
-				b.WriteString(fmt.Sprintf("\033[48;5;240m\033[97m > %s \033[0m\n", line))
-			} else {
-				b.WriteString(fmt.Sprintf("   %s\n", line))
-			}
-		}
+		b.WriteString(RenderTemplateList(m.templates, m.cursor))
 		b.WriteString("\nUse ↑/↓ to navigate, Enter to select")
 
 	case stepCreating:
 		selected := m.templates[m.cursor]
 		b.WriteString(fmt.Sprintf("Creating project '%s' with %s...\n\n", m.projectName, selected.Name()))
-		b.WriteString("╭─ Output ─────────────────────────────────────╮\n")
-		for _, line := range m.output {
-			b.WriteString(fmt.Sprintf("│ \033[90m%s\033[0m\n", line))
-		}
-		b.WriteString("╰──────────────────────────────────────────────╯\n")
+		b.WriteString(RenderOutputBox(m.output))
+
+	case stepChoice:
+		b.WriteString("✅ Project created successfully!\n\n")
+		b.WriteString(fmt.Sprintf("📁 Location: %s\n\n", m.projectName))
+		b.WriteString("What would you like to do?\n\n")
+		b.WriteString(RenderChoiceMenu(m.cursor, "Open terminal in project folder", "Exit"))
+		b.WriteString("\nUse ↑/↓ to navigate, Enter to select")
 
 	case stepDone:
 		if m.err != nil {
 			b.WriteString(fmt.Sprintf("❌ Error: %v\n", m.err))
-		} else {
-			b.WriteString(fmt.Sprintf("✅ Project '%s' created successfully!\n\n", m.projectName))
-			b.WriteString(fmt.Sprintf("cd %s && go run .\n", m.projectName))
 		}
 	}
 
-	if m.step != stepDone {
+	if m.step != stepDone && m.step != stepChoice {
 		b.WriteString("\n\nPress ctrl+c or q to quit")
 	}
 
@@ -185,5 +204,14 @@ func (m *model) createProject() tea.Cmd {
 			return doneMsg{err: err}
 		}
 		return doneMsg{err: nil}
+	}
+}
+
+func (m *model) openTerminal() tea.Cmd {
+	return func() tea.Msg {
+		if err := utils.OpenTerminalInDirectory(m.projectName); err != nil {
+			return doneMsg{err: err}
+		}
+		return tea.Quit()
 	}
 }

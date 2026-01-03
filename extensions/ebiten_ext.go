@@ -1,4 +1,4 @@
-// package extensions
+package extensions
 
 // func init() {
 // 	RegisterTemplate(ebitenTemplate{})
