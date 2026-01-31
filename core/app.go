@@ -1,3 +1,15 @@
+// app.go
+// Core application logic for project creation workflow.
+//
+// Types:
+//   - OutputHandler: callback for streaming command output lines
+//   - App: owns the project creation workflow with Debug mode support
+//
+// Functions:
+//   - CreateProject: scaffolds a project using the provided template
+//   - runCommandWithOutput: executes a command and streams output
+//   - streamOutput: reads from a reader and sends lines to OutputHandler
+//   - runShellCommand: runs a shell command string (cross-platform)
 package core
 
 import (
@@ -13,16 +25,13 @@ import (
 	"github.com/dlcuy22/endmi/extensions"
 )
 
-// OutputHandler receives streaming lines from command execution.
 type OutputHandler func(line string)
 
-// App owns the project creation workflow.
 type App struct {
 	Output OutputHandler
-	Debug  bool // When true, prints command execution details
+	Debug  bool
 }
 
-// CreateProject scaffolds a project using the provided template.
 func (a App) CreateProject(t extensions.Template, projectName string) error {
 	// Check if the template uses an external init command
 	if initCmd := t.InitCommand(); initCmd != "" {
@@ -110,8 +119,6 @@ func (a App) streamOutput(r io.Reader) {
 	}
 }
 
-// runShellCommand runs a shell command string in the specified directory.
-// On Windows, it uses cmd /C. On other platforms, it uses sh -c.
 func (a App) runShellCommand(command string, dir string) error {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {

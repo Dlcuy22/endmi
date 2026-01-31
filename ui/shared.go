@@ -1,3 +1,10 @@
+// shared.go
+// Shared UI rendering helpers for TUI components.
+//
+// Functions:
+//   - RenderTemplateList: renders a selectable list of templates with cursor
+//   - RenderChoiceMenu: renders a two-option choice menu with cursor
+//   - RenderOutputBox: renders a bordered output box with lines
 package ui
 
 import (
@@ -6,7 +13,6 @@ import (
 	"github.com/dlcuy22/endmi/extensions"
 )
 
-// RenderTemplateList renders a selectable list of templates with the cursor
 func RenderTemplateList(templates []extensions.Template, cursor int) string {
 	result := ""
 	for i, t := range templates {
@@ -20,7 +26,6 @@ func RenderTemplateList(templates []extensions.Template, cursor int) string {
 	return result
 }
 
-// RenderChoiceMenu renders a two-option choice menu with cursor
 func RenderChoiceMenu(cursor int, option1, option2 string) string {
 	result := ""
 	if cursor == 0 {
@@ -37,7 +42,6 @@ func RenderChoiceMenu(cursor int, option1, option2 string) string {
 	return result
 }
 
-// RenderOutputBox renders a bordered output box with lines
 func RenderOutputBox(lines []string) string {
 	result := "╭─ Output ─────────────────────────────────────╮\n"
 	for _, line := range lines {

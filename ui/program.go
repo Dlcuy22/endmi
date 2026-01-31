@@ -1,3 +1,18 @@
+// program.go
+// Bubble Tea TUI for interactive project creation.
+//
+// Types:
+//   - step: enum for wizard steps
+//   - outputMsg: message for streaming command output
+//   - doneMsg: message for project creation completion
+//   - model: Bubble Tea model state
+//
+// Functions:
+//   - initialModel: creates initial model state
+//   - NewProgram: wires a Bubble Tea program for the CLI
+//   - Init/Update/View: Bubble Tea interface methods
+//   - createProject: command to create the project
+//   - openTerminal: command to open terminal in project folder
 package ui
 
 import (
@@ -57,7 +72,6 @@ func initialModel(app *core.App, templates []extensions.Template, projectName st
 	}
 }
 
-// NewProgram wires a Bubble Tea program for the CLI.
 func NewProgram(app *core.App, templates []extensions.Template, projectName string) *tea.Program {
 	m := initialModel(app, templates, projectName)
 	p := tea.NewProgram(&m)

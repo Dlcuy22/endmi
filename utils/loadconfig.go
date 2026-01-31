@@ -1,3 +1,18 @@
+// loadconfig.go
+// Configuration management for endmi settings stored in ~/.endmi/endmi.json.
+//
+// Types:
+//   - Config: represents the structure of endmi.json
+//
+// Functions:
+//   - getHomeDir: resolves the user's home directory
+//   - GetConfigDir: returns the full path to ~/.endmi
+//   - GetConfigFilePath: returns the full path to ~/.endmi/endmi.json
+//   - CreateConfigPathIfNotExists: ensures ~/.endmi exists
+//   - GenerateDefaultConfig: builds the default configuration dynamically
+//   - WriteConfig: writes the default configuration file
+//   - CheckConfigExists: returns true if ~/.endmi/endmi.json exists
+//   - EnsureConfig: ensures the config directory and file exist
 package utils
 
 import (
@@ -12,13 +27,10 @@ const (
 	configFileName = "endmi.json"
 )
 
-// Config represents the structure of endmi.json
 type Config struct {
 	TempDir string `json:"TempDir"`
 }
 
-// getHomeDir resolves the user's home directory.
-// Returns an error instead of silently falling back.
 func getHomeDir() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil || homeDir == "" {
@@ -27,7 +39,6 @@ func getHomeDir() (string, error) {
 	return homeDir, nil
 }
 
-// GetConfigDir returns the full path to ~/.endmi
 func GetConfigDir() (string, error) {
 	homeDir, err := getHomeDir()
 	if err != nil {
@@ -36,7 +47,6 @@ func GetConfigDir() (string, error) {
 	return filepath.Join(homeDir, configDirName), nil
 }
 
-// GetConfigFilePath returns the full path to ~/.endmi/endmi.json
 func GetConfigFilePath() (string, error) {
 	configDir, err := GetConfigDir()
 	if err != nil {
@@ -45,7 +55,6 @@ func GetConfigFilePath() (string, error) {
 	return filepath.Join(configDir, configFileName), nil
 }
 
-// CreateConfigPathIfNotExists ensures ~/.endmi exists
 func CreateConfigPathIfNotExists() error {
 	configDir, err := GetConfigDir()
 	if err != nil {
@@ -54,7 +63,6 @@ func CreateConfigPathIfNotExists() error {
 	return os.MkdirAll(configDir, 0755)
 }
 
-// GenerateDefaultConfig builds the default configuration dynamically
 func GenerateDefaultConfig() ([]byte, error) {
 	configDir, err := GetConfigDir()
 	if err != nil {
@@ -70,8 +78,6 @@ func GenerateDefaultConfig() ([]byte, error) {
 	return json.MarshalIndent(cfg, "", "\t")
 }
 
-// WriteConfig writes the default configuration file.
-// Fails if the file already exists.
 func WriteConfig() error {
 	if err := CreateConfigPathIfNotExists(); err != nil {
 		return err
@@ -100,7 +106,6 @@ func WriteConfig() error {
 	return os.WriteFile(configPath, data, 0644)
 }
 
-// CheckConfigExists returns true if ~/.endmi/endmi.json exists
 func CheckConfigExists() (bool, error) {
 	configPath, err := GetConfigFilePath()
 	if err != nil {
@@ -119,8 +124,6 @@ func CheckConfigExists() (bool, error) {
 	return false, err
 }
 
-// EnsureConfig ensures the config directory and file exist.
-// Safe to call multiple times.
 func EnsureConfig() error {
 	exists, err := CheckConfigExists()
 	if err != nil {

@@ -1,3 +1,9 @@
+// templates.go
+// Template lookup utilities for finding and listing templates.
+//
+// Functions:
+//   - FindTemplateByName: searches for a template by name in the provided list
+//   - ListTemplateNames: returns a formatted string of all available template names
 package utils
 
 import (
@@ -6,7 +12,6 @@ import (
 	"github.com/dlcuy22/endmi/extensions"
 )
 
-// FindTemplateByName searches for a template by name in the provided list
 func FindTemplateByName(templates []extensions.Template, name string) (extensions.Template, error) {
 	for _, t := range templates {
 		if t.Name() == name {
@@ -16,7 +21,6 @@ func FindTemplateByName(templates []extensions.Template, name string) (extension
 	return nil, fmt.Errorf("template '%s' not found", name)
 }
 
-// ListTemplateNames returns a formatted string of all available template names
 func ListTemplateNames(templates []extensions.Template) string {
 	result := "Available templates:\n"
 	for _, t := range templates {

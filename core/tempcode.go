@@ -1,3 +1,20 @@
+// tempcode.go
+// Temporary code workspace management for ephemeral project creation.
+//
+// Types:
+//   - TempCodeManager: handles temporary code workspace operations
+//   - TempProjectMetadata: stores metadata about a temporary project
+//
+// Functions:
+//   - loadConfig: loads the endmi configuration from disk
+//   - GetTempDir: returns the configured temporary directory path
+//   - CreateTempProject: creates a new temporary project in the temp workspace
+//   - saveMetadata: saves project metadata to .endmi_meta.json
+//   - loadMetadata: loads project metadata from .endmi_meta.json
+//   - ListTempProjects: returns a list of all temporary projects
+//   - DeleteTempProject: removes a temporary project
+//   - CleanAll: removes all temporary projects
+//   - PromoteTempProject: moves a temporary project to a permanent location
 package core
 
 import (
@@ -12,12 +29,10 @@ import (
 	"github.com/dlcuy22/endmi/utils"
 )
 
-// TempCodeManager handles temporary code workspace operations
 type TempCodeManager struct {
 	App *App
 }
 
-// TempProjectMetadata stores metadata about a temporary project
 type TempProjectMetadata struct {
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
@@ -25,7 +40,6 @@ type TempProjectMetadata struct {
 	Path      string    `json:"path"`
 }
 
-// loadConfig loads the endmi configuration
 func loadConfig() (*utils.Config, error) {
 	configPath, err := utils.GetConfigFilePath()
 	if err != nil {
@@ -45,7 +59,6 @@ func loadConfig() (*utils.Config, error) {
 	return &cfg, nil
 }
 
-// GetTempDir returns the configured temporary directory path
 func (tcm *TempCodeManager) GetTempDir() (string, error) {
 	cfg, err := loadConfig()
 	if err != nil {
@@ -60,7 +73,6 @@ func (tcm *TempCodeManager) GetTempDir() (string, error) {
 	return cfg.TempDir, nil
 }
 
-// CreateTempProject creates a new temporary project in the temp workspace
 func (tcm *TempCodeManager) CreateTempProject(template extensions.Template, projectName string) (string, error) {
 	tempDir, err := tcm.GetTempDir()
 	if err != nil {
@@ -144,7 +156,6 @@ func (tcm *TempCodeManager) CreateTempProject(template extensions.Template, proj
 	return projectPath, nil
 }
 
-// saveMetadata saves project metadata to a .endmi_meta.json file
 func (tcm *TempCodeManager) saveMetadata(projectPath string, metadata TempProjectMetadata) error {
 	metaPath := filepath.Join(projectPath, ".endmi_meta.json")
 	data, err := json.MarshalIndent(metadata, "", "  ")
@@ -154,7 +165,6 @@ func (tcm *TempCodeManager) saveMetadata(projectPath string, metadata TempProjec
 	return os.WriteFile(metaPath, data, 0644)
 }
 
-// loadMetadata loads project metadata from .endmi_meta.json
 func (tcm *TempCodeManager) loadMetadata(projectPath string) (*TempProjectMetadata, error) {
 	metaPath := filepath.Join(projectPath, ".endmi_meta.json")
 	data, err := os.ReadFile(metaPath)
@@ -170,7 +180,6 @@ func (tcm *TempCodeManager) loadMetadata(projectPath string) (*TempProjectMetada
 	return &metadata, nil
 }
 
-// ListTempProjects returns a list of all temporary projects
 func (tcm *TempCodeManager) ListTempProjects() ([]TempProjectMetadata, error) {
 	tempDir, err := tcm.GetTempDir()
 	if err != nil {
@@ -211,7 +220,6 @@ func (tcm *TempCodeManager) ListTempProjects() ([]TempProjectMetadata, error) {
 	return projects, nil
 }
 
-// DeleteTempProject removes a temporary project
 func (tcm *TempCodeManager) DeleteTempProject(projectName string) error {
 	tempDir, err := tcm.GetTempDir()
 	if err != nil {
@@ -226,7 +234,6 @@ func (tcm *TempCodeManager) DeleteTempProject(projectName string) error {
 	return os.RemoveAll(projectPath)
 }
 
-// CleanAll removes all temporary projects
 func (tcm *TempCodeManager) CleanAll() error {
 	tempDir, err := tcm.GetTempDir()
 	if err != nil {
@@ -252,7 +259,6 @@ func (tcm *TempCodeManager) CleanAll() error {
 	return nil
 }
 
-// PromoteTempProject moves a temporary project to a permanent location
 func (tcm *TempCodeManager) PromoteTempProject(projectName, targetPath string) error {
 	tempDir, err := tcm.GetTempDir()
 	if err != nil {

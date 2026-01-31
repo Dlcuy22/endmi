@@ -1,3 +1,16 @@
+// tempprogram.go
+// Bubble Tea TUI for interactive temporary project creation.
+//
+// Types:
+//   - tempStep: enum for wizard steps
+//   - tempModel: Bubble Tea model state for temp projects
+//
+// Functions:
+//   - initialTempModel: creates initial model state
+//   - NewTempProgram: creates a Bubble Tea program for temporary project creation
+//   - Init/Update/View: Bubble Tea interface methods
+//   - createTempProject: command to create the temp project
+//   - openTerminal: command to open terminal in temp folder
 package ui
 
 import (
@@ -44,7 +57,6 @@ func initialTempModel(tcm *core.TempCodeManager, templates []extensions.Template
 	}
 }
 
-// NewTempProgram creates a Bubble Tea program for temporary project creation
 func NewTempProgram(tcm *core.TempCodeManager, templates []extensions.Template) *tea.Program {
 	m := initialTempModel(tcm, templates)
 	p := tea.NewProgram(&m)

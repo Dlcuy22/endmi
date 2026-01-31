@@ -1,3 +1,8 @@
+// terminal.go
+// Platform-aware terminal launching utilities.
+//
+// Functions:
+//   - OpenTerminalInDirectory: opens a new terminal window in the specified directory
 package utils
 
 import (
@@ -6,14 +11,11 @@ import (
 	"runtime"
 )
 
-// OpenTerminalInDirectory opens a new terminal window in the specified directory.
-// It's platform-aware and tries multiple terminal options on each platform.
 func OpenTerminalInDirectory(dir string) error {
 	var cmd *exec.Cmd
 
 	switch runtime.GOOS {
 	case "windows":
-		// Try Windows Terminal first, then PowerShell, then CMD
 		cmd = exec.Command("wt.exe", "-w", "0", "nt", "-d", dir, "pwsh.exe")
 		if err := cmd.Start(); err == nil {
 			return nil
@@ -30,7 +32,6 @@ func OpenTerminalInDirectory(dir string) error {
 		}
 
 	case "darwin":
-		// macOS - use Terminal.app with AppleScript
 		script := fmt.Sprintf(`tell application "Terminal" to do script "cd '%s'"`, dir)
 		cmd = exec.Command("osascript", "-e", script)
 		if err := cmd.Start(); err != nil {
@@ -38,7 +39,6 @@ func OpenTerminalInDirectory(dir string) error {
 		}
 
 	case "linux":
-		// Linux - try common terminal emulators
 		terminals := [][]string{
 			{"gnome-terminal", "--working-directory=" + dir},
 			{"konsole", "--workdir", dir},

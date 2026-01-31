@@ -1,3 +1,10 @@
+// main.go
+// CLI entry point for the Endmi project manager.
+// Handles command parsing and dispatches to appropriate subcommands.
+//
+// Functions:
+//   - showHelp: displays usage information and available templates
+//   - main: entry point, parses args and routes to create/temp subcommands
 package main
 
 import (
