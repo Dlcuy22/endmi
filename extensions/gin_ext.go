@@ -9,6 +9,8 @@ type ginTemplate struct{}
 func (ginTemplate) Name() string        { return "gin" }
 func (ginTemplate) Description() string { return "Gin Web Framework" }
 func (ginTemplate) RootDir() string     { return "" }
+func (ginTemplate) InitCommand() string { return "" }
+func (ginTemplate) PreCreateDir() bool  { return true }
 func (ginTemplate) Dependencies() []string {
 	return []string{"github.com/gin-gonic/gin"}
 }

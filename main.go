@@ -24,6 +24,7 @@ func showHelp() {
 	fmt.Println("Flags:")
 	fmt.Println("  -t, --template <name>                  Specify template (skip interactive selection)")
 	fmt.Println("  -n, --name <name>                      Specify project name (for temp create)")
+	fmt.Println("  --debug                                Print command execution details")
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  endmi create                           Start interactive project creation")
@@ -72,6 +73,7 @@ func main() {
 	case "create":
 		var projectName string
 		var templateName string
+		var debugMode bool
 
 		// Parse arguments and flags
 		for i := 2; i < len(os.Args); i++ {
@@ -84,12 +86,14 @@ func main() {
 					fmt.Println("Error: --template/-t requires a template name")
 					os.Exit(1)
 				}
+			} else if arg == "--debug" {
+				debugMode = true
 			} else if projectName == "" {
 				projectName = arg
 			}
 		}
 
-		app := &core.App{}
+		app := &core.App{Debug: debugMode}
 		templates := extensions.BuiltinTemplates()
 
 		// If template is specified via flag, create project directly
@@ -142,7 +146,15 @@ func main() {
 		}
 
 		subcommand := os.Args[2]
-		app := &core.App{}
+		var debugMode bool
+		// Pre-scan for --debug flag
+		for _, arg := range os.Args {
+			if arg == "--debug" {
+				debugMode = true
+				break
+			}
+		}
+		app := &core.App{Debug: debugMode}
 		tcm := &core.TempCodeManager{App: app}
 
 		switch subcommand {
@@ -170,6 +182,7 @@ func main() {
 						i++
 					}
 				}
+				// --debug is already parsed at subcommand level
 			}
 
 			// If template is specified via flag, create directly

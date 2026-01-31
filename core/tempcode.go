@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dlcuy22/endmi/extensions"
@@ -78,43 +79,53 @@ func (tcm *TempCodeManager) CreateTempProject(template extensions.Template, proj
 		return "", fmt.Errorf("temp project '%s' already exists", projectName)
 	}
 
-	// Create project using the App's CreateProject method
-	if err := os.MkdirAll(projectPath, 0755); err != nil {
-		return "", fmt.Errorf("failed to create project directory: %w", err)
-	}
-
 	// Store original directory since CreateProject expects relative path
-	originalApp := *tcm.App
-	projectApp := &App{Output: originalApp.Output}
+	projectApp := &App{Output: tcm.App.Output, Debug: tcm.App.Debug}
 
-	// Create the project structure
-	baseDir := filepath.Join(projectPath, template.RootDir())
-	if err := os.MkdirAll(baseDir, 0755); err != nil {
-		return "", err
-	}
-
-	if err := projectApp.runCommandWithOutput("go", projectPath, "mod", "init", projectName); err != nil {
-		return "", err
-	}
-
-	for rel, content := range template.Files(projectName) {
-		fullPath := filepath.Join(baseDir, rel)
-		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-			return "", err
-		}
-		if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-			return "", err
+	// Pre-create directory if the template requires it
+	if template.PreCreateDir() {
+		if err := os.MkdirAll(projectPath, 0755); err != nil {
+			return "", fmt.Errorf("failed to create project directory: %w", err)
 		}
 	}
 
-	for _, dep := range template.Dependencies() {
-		if err := projectApp.runCommandWithOutput("go", projectPath, "get", dep); err != nil {
+	// Check if the template uses an external init command
+	if initCmd := template.InitCommand(); initCmd != "" {
+		// Replace {{name}} placeholder with actual project name
+		initCmd = strings.ReplaceAll(initCmd, "{{name}}", projectName)
+		if err := projectApp.runShellCommand(initCmd, tempDir); err != nil {
 			return "", err
 		}
-	}
+	} else {
+		// Standard project creation (generate files manually)
+		baseDir := filepath.Join(projectPath, template.RootDir())
+		if err := os.MkdirAll(baseDir, 0755); err != nil {
+			return "", err
+		}
 
-	if err := projectApp.runCommandWithOutput("go", projectPath, "mod", "tidy"); err != nil {
-		return "", err
+		if err := projectApp.runCommandWithOutput("go", projectPath, "mod", "init", projectName); err != nil {
+			return "", err
+		}
+
+		for rel, content := range template.Files(projectName) {
+			fullPath := filepath.Join(baseDir, rel)
+			if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+				return "", err
+			}
+			if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
+				return "", err
+			}
+		}
+
+		for _, dep := range template.Dependencies() {
+			if err := projectApp.runCommandWithOutput("go", projectPath, "get", dep); err != nil {
+				return "", err
+			}
+		}
+
+		if err := projectApp.runCommandWithOutput("go", projectPath, "mod", "tidy"); err != nil {
+			return "", err
+		}
 	}
 
 	// Save metadata

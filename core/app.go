@@ -2,10 +2,13 @@ package core
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/dlcuy22/endmi/extensions"
 )
@@ -16,10 +19,22 @@ type OutputHandler func(line string)
 // App owns the project creation workflow.
 type App struct {
 	Output OutputHandler
+	Debug  bool // When true, prints command execution details
 }
 
 // CreateProject scaffolds a project using the provided template.
 func (a App) CreateProject(t extensions.Template, projectName string) error {
+	// Check if the template uses an external init command
+	if initCmd := t.InitCommand(); initCmd != "" {
+		// Replace {{name}} placeholder with actual project name
+		initCmd = strings.ReplaceAll(initCmd, "{{name}}", projectName)
+		if err := a.runShellCommand(initCmd, "."); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Standard project creation (generate files manually)
 	projectPath := projectName
 
 	if err := os.MkdirAll(projectPath, 0755); err != nil {
@@ -59,6 +74,10 @@ func (a App) CreateProject(t extensions.Template, projectName string) error {
 }
 
 func (a App) runCommandWithOutput(name string, dir string, args ...string) error {
+	if a.Debug {
+		fmt.Printf("[DEBUG] Running: %s %s (in %s)\n", name, strings.Join(args, " "), dir)
+	}
+
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 
@@ -89,4 +108,36 @@ func (a App) streamOutput(r io.Reader) {
 	for scanner.Scan() {
 		a.Output(scanner.Text())
 	}
+}
+
+// runShellCommand runs a shell command string in the specified directory.
+// On Windows, it uses cmd /C. On other platforms, it uses sh -c.
+func (a App) runShellCommand(command string, dir string) error {
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", command)
+	} else {
+		cmd = exec.Command("sh", "-c", command)
+	}
+	cmd.Dir = dir
+
+	if a.Debug {
+		fmt.Printf("[DEBUG] Shell command: %s\n", command)
+		fmt.Printf("[DEBUG] Working directory: %s\n", dir)
+		fmt.Printf("[DEBUG] Full exec: %s %v\n", cmd.Path, cmd.Args)
+	}
+
+	// Use CombinedOutput to capture both stdout and stderr
+	output, err := cmd.CombinedOutput()
+	if a.Debug && len(output) > 0 {
+		fmt.Printf("[DEBUG] Command output:\n%s\n", string(output))
+	}
+	if err != nil {
+		if len(output) > 0 {
+			fmt.Printf("Command output:\n%s\n", string(output))
+		}
+		return err
+	}
+
+	return nil
 }

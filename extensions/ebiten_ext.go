@@ -9,6 +9,8 @@ type ebitenTemplate struct{}
 func (ebitenTemplate) Name() string        { return "ebiten" }
 func (ebitenTemplate) Description() string { return "Ebiten game engine template" }
 func (ebitenTemplate) RootDir() string     { return "" }
+func (ebitenTemplate) InitCommand() string { return "" }
+func (ebitenTemplate) PreCreateDir() bool  { return true }
 func (ebitenTemplate) Dependencies() []string {
 	return []string{"github.com/hajimehoshi/ebiten/v2"}
 }

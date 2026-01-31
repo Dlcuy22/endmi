@@ -9,6 +9,8 @@ type netHTTPTemplate struct{}
 func (netHTTPTemplate) Name() string        { return "net/http" }
 func (netHTTPTemplate) Description() string { return "Standard library HTTP server" }
 func (netHTTPTemplate) RootDir() string     { return "" }
+func (netHTTPTemplate) InitCommand() string { return "" }
+func (netHTTPTemplate) PreCreateDir() bool  { return true }
 func (netHTTPTemplate) Dependencies() []string {
 	return nil
 }

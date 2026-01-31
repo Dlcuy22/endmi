@@ -9,6 +9,8 @@ type fiberTemplate struct{}
 func (fiberTemplate) Name() string        { return "fiber" }
 func (fiberTemplate) Description() string { return "fiber template" }
 func (fiberTemplate) RootDir() string     { return "" }
+func (fiberTemplate) InitCommand() string { return "" }
+func (fiberTemplate) PreCreateDir() bool  { return true }
 func (fiberTemplate) Dependencies() []string {
 	return []string{"github.com/gofiber/fiber/v2", "github.com/gofiber/template/html/v2"}
 }

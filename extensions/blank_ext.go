@@ -9,6 +9,8 @@ type blankTemplate struct{}
 func (blankTemplate) Name() string        { return "blank" }
 func (blankTemplate) Description() string { return "Empty Go project" }
 func (blankTemplate) RootDir() string     { return "" }
+func (blankTemplate) InitCommand() string { return "" }
+func (blankTemplate) PreCreateDir() bool  { return true }
 func (blankTemplate) Dependencies() []string {
 	return nil
 }

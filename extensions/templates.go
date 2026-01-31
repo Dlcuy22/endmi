@@ -19,6 +19,15 @@ type Template interface {
 	Files(projectName string) map[string]string
 	// Dependencies lists Go modules that should be installed with `go get`.
 	Dependencies() []string
+	// InitCommand returns an optional shell command to run for project
+	// initialization (e.g., "wails init -n {{name}} -t react-ts"). The
+	// placeholder {{name}} will be replaced with the actual project name.
+	// Return an empty string if no external command is needed.
+	InitCommand() string
+	// PreCreateDir returns whether to create the project directory before
+	// running InitCommand. Set to false if the external tool creates its own
+	// directory (e.g., wails init). Defaults to true for standard templates.
+	PreCreateDir() bool
 }
 
 var registry []Template
